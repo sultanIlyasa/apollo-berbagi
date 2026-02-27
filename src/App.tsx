@@ -32,7 +32,7 @@ interface Config {
 // ─── CONFIG ──────────────────────────────────────────────────────
 const CONFIG: Config = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyskWmGGiHqGGk8frH3sLakCFMm-MiHBz2m87FZCzJyaVg6CcCaCcDgghhsFtZzvDDmFA/exec",
-  GOOGLE_FORM_URL: "https://docs.google.com/spreadsheets/d/THIS_IS_YOUR_SHEET_ID/edit",
+  GOOGLE_FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLSfQaB8NeGIUHhAQaq40GeBE5ue6ra69o_THhaO7h7aY4gy0rg/viewform?usp=sharing&ouid=115400645084318247963",
   DONATION_GOAL: 15_000_000,
   REFRESH_MS: 30_000,
 };
