@@ -1,12 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Moon, Sun } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // ─── TYPES ────────────────────────────────────────────────────────
 interface Donation {
@@ -31,9 +25,11 @@ interface Config {
 
 // ─── CONFIG ──────────────────────────────────────────────────────
 const CONFIG: Config = {
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyskWmGGiHqGGk8frH3sLakCFMm-MiHBz2m87FZCzJyaVg6CcCaCcDgghhsFtZzvDDmFA/exec",
-  GOOGLE_FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLSfQaB8NeGIUHhAQaq40GeBE5ue6ra69o_THhaO7h7aY4gy0rg/viewform?usp=sharing&ouid=115400645084318247963",
-  DONATION_GOAL: 15_000_000,
+  APPS_SCRIPT_URL:
+    "https://script.google.com/macros/s/AKfycbyskWmGGiHqGGk8frH3sLakCFMm-MiHBz2m87FZCzJyaVg6CcCaCcDgghhsFtZzvDDmFA/exec",
+  GOOGLE_FORM_URL:
+    "https://docs.google.com/forms/d/e/1FAIpQLSfQaB8NeGIUHhAQaq40GeBE5ue6ra69o_THhaO7h7aY4gy0rg/viewform?usp=sharing&ouid=115400645084318247963",
+  DONATION_GOAL: 5_900_000,
   REFRESH_MS: 30_000,
 };
 
@@ -75,7 +71,7 @@ const DEMO: Donation[] = [
 const formatRp = (n: number): string =>
   "Rp\u00A0" + Number(n).toLocaleString("id-ID");
 
-function useCountUp(target: number, duration = 1800): number {
+function useCountUp(target: number, duration = 2200): number {
   const [value, setValue] = useState<number>(0);
   const rafRef = useRef<number | null>(null);
 
@@ -83,7 +79,7 @@ function useCountUp(target: number, duration = 1800): number {
     const start = performance.now();
     const step = (now: number) => {
       const p = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - p, 4);
+      const eased = 1 - Math.pow(1 - p, 5);
       setValue(Math.round(eased * target));
       if (p < 1) rafRef.current = requestAnimationFrame(step);
     };
@@ -96,39 +92,63 @@ function useCountUp(target: number, duration = 1800): number {
   return value;
 }
 
-// ─── CRESCENT SVG ─────────────────────────────────────────────────
-function Crescent({ size = 32 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
-      <path
-        d="M20 4a12 12 0 1 0 0 24 9 9 0 1 1 0-24z"
-        fill="currentColor"
-        className="text-amber-500"
-      />
-    </svg>
-  );
-}
-
-// ─── ANIMATED TOTAL ───────────────────────────────────────────────
 function AnimatedTotal({ amount }: { amount: number }) {
   const val = useCountUp(amount);
   return <span>{formatRp(val)}</span>;
 }
 
-// ─── SKELETON CARD ────────────────────────────────────────────────
+// ─── STAR FIELD ───────────────────────────────────────────────────
+function StarField() {
+  const stars = Array.from({ length: 80 }, (_, i) => ({
+    id: i,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    size: Math.random() * 1.5 + 0.5,
+    delay: Math.random() * 6,
+    duration: Math.random() * 4 + 3,
+  }));
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      {stars.map((s) => (
+        <div
+          key={s.id}
+          className="absolute rounded-full bg-white"
+          style={{
+            top: `${s.top}%`,
+            left: `${s.left}%`,
+            width: `${s.size}px`,
+            height: `${s.size}px`,
+            opacity: 0,
+            animation: `starTwinkle ${s.duration}s ease-in-out ${s.delay}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── CRESCENT ─────────────────────────────────────────────────────
+function Crescent({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
+      <path d="M20 4a12 12 0 1 0 0 24 9 9 0 1 1 0-24z" fill="#A855F7" />
+    </svg>
+  );
+}
+
+// ─── SKELETON ─────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
-    <Card className="border-stone-200 bg-white">
-      <CardContent className="p-4 sm:p-5">
-        <div className="flex justify-between">
-          <div className="space-y-2">
-            <div className="h-3.5 w-28 bg-stone-100 rounded animate-pulse" />
-            <div className="h-2.5 w-20 bg-stone-100 rounded animate-pulse" />
-          </div>
-          <div className="h-4 w-24 bg-stone-100 rounded animate-pulse" />
+    <div className="rounded-lg border border-white/10 bg-white/5 p-4 sm:p-5">
+      <div className="flex justify-between">
+        <div className="space-y-2">
+          <div className="h-3.5 w-28 rounded bg-white/10 animate-pulse" />
+          <div className="h-2.5 w-20 rounded bg-white/10 animate-pulse" />
         </div>
-      </CardContent>
-    </Card>
+        <div className="h-4 w-24 rounded bg-white/10 animate-pulse" />
+      </div>
+    </div>
   );
 }
 
@@ -136,60 +156,94 @@ function SkeletonCard() {
 interface DonorCardProps {
   donor: Donation;
   rank: number;
-  onReceiptClick: (url: string) => void;
   delay: number;
 }
 
-function DonorCard({ donor, rank, onReceiptClick, delay }: DonorCardProps) {
+function DonorCard({ donor, rank, delay }: DonorCardProps) {
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
-    <Card
-      className="group border-stone-200/80 bg-white/80 backdrop-blur-sm hover:border-amber-300 hover:shadow-md transition-all duration-300"
+    <div
+      className="group relative rounded-lg p-4 sm:p-5 transition-all duration-500 cursor-default"
       style={{
-        animation: "fadeSlideUp 0.5s ease both",
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        animation: "cardReveal 0.7s cubic-bezier(0.16,1,0.3,1) both",
         animationDelay: `${delay}ms`,
       }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.border =
+          "1px solid rgba(168,85,247,0.35)";
+        (e.currentTarget as HTMLDivElement).style.background =
+          "rgba(255,255,255,0.06)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.border =
+          "1px solid rgba(255,255,255,0.08)";
+        (e.currentTarget as HTMLDivElement).style.background =
+          "rgba(255,255,255,0.04)";
+      }}
     >
-      <CardContent className="p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              {rank < 3 && (
-                <span className="text-sm shrink-0">{medals[rank]}</span>
-              )}
-              <p className="font-semibold text-stone-800 truncate text-sm leading-tight">
-                {donor.name}
-              </p>
-            </div>
-            <p className="text-xs text-stone-400 font-mono mt-0.5">
-              {donor.timestamp}
-            </p>
-          </div>
-          <div className="text-right shrink-0">
-            <p className="text-base sm:text-lg font-bold text-amber-600 tabular-nums">
-              {formatRp(donor.amount)}
-            </p>
-          </div>
-        </div>
+      {/* top shimmer on hover */}
+      <div
+        className="absolute top-0 left-4 right-4 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(168,85,247,0.5), transparent)",
+        }}
+      />
 
-        {donor.receiptUrl && (
-          <button
-            onClick={() => onReceiptClick(donor.receiptUrl)}
-            className="mt-3 w-full rounded overflow-hidden block group/img text-left"
-          >
-            <img
-              src={donor.receiptUrl}
-              alt="Receipt"
-              className="w-full h-20 object-cover opacity-70 group-hover/img:opacity-100 transition-opacity duration-200"
-            />
-            <p className="text-[10px] text-stone-400 mt-1">
-              Tap to view receipt ↗
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            {rank < 3 && (
+              <span className="text-sm shrink-0">{medals[rank]}</span>
+            )}
+            <p className="font-medium text-stone-200 truncate text-sm leading-tight tracking-wide">
+              {donor.name}
             </p>
-          </button>
-        )}
-      </CardContent>
-    </Card>
+          </div>
+          <p className="text-[11px] text-stone-500 font-mono mt-0.5">
+            {donor.timestamp}
+          </p>
+        </div>
+        <div className="text-right shrink-0">
+          <p
+            className="text-base sm:text-lg font-bold tabular-nums"
+            style={{ color: "#c084fc" }}
+          >
+            {formatRp(donor.amount)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── COSMIC PROGRESS ──────────────────────────────────────────────
+function CosmicProgress({ value }: { value: number }) {
+  return (
+    <div
+      className="relative h-1.5 w-full rounded-full overflow-hidden"
+      style={{ background: "rgba(255,255,255,0.08)" }}
+    >
+      <div
+        className="h-full rounded-full relative transition-all duration-[1500ms] ease-out"
+        style={{
+          width: `${value}%`,
+          background: "linear-gradient(90deg, #4a1d96, #a855f7, #d8b4fe)",
+          boxShadow: "0 0 10px rgba(168,85,247,0.5)",
+        }}
+      >
+        <div
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full"
+          style={{
+            background: "#d8b4fe",
+            boxShadow: "0 0 8px 3px rgba(216,180,254,0.7)",
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -199,13 +253,6 @@ export default function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [dark, setDark] = useState<boolean>(() =>
-    document.documentElement.classList.contains("dark"),
-  );
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
 
   const isDemo = CONFIG.APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_URL";
 
@@ -221,8 +268,8 @@ export default function App() {
       const data: ApiResponse = await res.json();
       setDonations(data.donations ?? []);
       setError(null);
-    } catch (e) {
-      setError("Could not load donation data. Will retry automatically.");
+    } catch {
+      setError("Could not load donation data. Retrying automatically.");
     } finally {
       setLoading(false);
     }
@@ -241,183 +288,361 @@ export default function App() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
-        body {
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html, body {
+          margin: 0; padding: 0;
           font-family: 'DM Sans', sans-serif;
-          background-color: #FAFAF8;
-          color: #1c1917;
+          background-color: #09090f;
+          color: #e2e8f0;
+          min-height: 100vh;
         }
 
-        .serif { font-family: 'Lora', serif; }
+        .display { font-family: 'Cormorant Garamond', serif; }
 
-        @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(14px); }
+        body::before {
+          content: '';
+          position: fixed; inset: 0; z-index: 0; pointer-events: none;
+          background:
+            radial-gradient(ellipse 80% 50% at 50% -10%, rgba(88,28,135,0.22) 0%, transparent 70%),
+            radial-gradient(ellipse 50% 40% at 85% 55%,  rgba(15,23,50,0.5)   0%, transparent 70%),
+            radial-gradient(ellipse 50% 60% at 10% 85%,  rgba(10,30,40,0.4)   0%, transparent 70%),
+            #09090f;
+        }
+
+        @keyframes starTwinkle {
+          0%, 100% { opacity: 0;   transform: scale(0.8); }
+          50%       { opacity: 0.6; transform: scale(1.2); }
+        }
+        @keyframes heroReveal {
+          from { opacity: 0; transform: translateY(28px); filter: blur(4px); }
+          to   { opacity: 1; transform: translateY(0);    filter: blur(0);   }
+        }
+        @keyframes cardReveal {
+          from { opacity: 0; transform: translateY(18px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0)    scale(1);    }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-
-        .page-enter { animation: fadeSlideUp 0.7s ease both; }
-
-        .grain {
-          position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0.025;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        @keyframes orbitGlow {
+          0%, 100% { filter: drop-shadow(0 0 4px rgba(168,85,247,0.4)); }
+          50%       { filter: drop-shadow(0 0 10px rgba(168,85,247,0.9)); }
         }
+
+        .hero-block  { animation: heroReveal 1.2s cubic-bezier(0.16,1,0.3,1) both; }
+        .stats-block { animation: fadeUp 0.8s ease both; }
+        .crescent-glow { animation: orbitGlow 3s ease-in-out infinite; }
+
+        .cosmic-sep {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(168,85,247,0.25), rgba(255,255,255,0.06), rgba(168,85,247,0.25), transparent);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(168,85,247,0.25); border-radius: 2px; }
       `}</style>
 
-      <div className="grain" />
-      <div className="h-0.5 w-full bg-linear-to-r from-amber-300 via-orange-400 to-amber-300" />
+      <StarField />
 
-      {/* CHANGED: Adjusted horizontal and vertical padding for mobile screens */}
-      <div className="min-h-screen max-w-3xl mx-auto px-4 sm:px-6 py-8 md:py-14 page-enter">
+      {/* Amber top bar */}
+      <div
+        className="fixed top-0 left-0 right-0 h-px z-50"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, #a855f7, #d8b4fe, #a855f7, transparent)",
+        }}
+      />
+
+      <div className="relative z-10 min-h-screen max-w-2xl mx-auto px-5 sm:px-8 pt-12 pb-20">
         {/* ── HEADER ── */}
-        <header className="mb-10 md:mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* CHANGED: Made crescent slightly smaller on very small screens */}
-              <div className="hidden sm:block">
-                <Crescent size={28} />
-              </div>
-              <div className="block sm:hidden">
-                <Crescent size={24} />
-              </div>
-
-              <Badge
-                variant="outline"
-                className="text-amber-700 border-amber-300 bg-amber-50 font-normal text-[10px] sm:text-xs tracking-widest uppercase"
-              >
-                Ramadan 1446 H
-              </Badge>
+        <header className="mb-14">
+          <div
+            className="flex items-center gap-3 mb-8 hero-block"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <div className="crescent-glow">
+              <Crescent size={26} />
             </div>
-            <button
-              onClick={() => setDark((d) => !d)}
-              className="p-2 rounded-full text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-              aria-label="Toggle dark mode"
+            <Badge
+              variant="outline"
+              className="font-normal text-[10px] tracking-[0.25em] uppercase px-3 py-0.5"
+              style={{
+                borderColor: "rgba(168,85,247,0.3)",
+                background: "rgba(168,85,247,0.07)",
+                color: "#c084fc",
+              }}
             >
-              {dark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+              Ramadan 1446 H
+            </Badge>
           </div>
 
-          {/* CHANGED: Responsive text sizing (text-4xl to md:text-5xl) */}
-          <h1 className="serif text-4xl md:text-5xl font-semibold text-stone-900 tracking-tight leading-none mb-3 md:mb-4">
-            Apollo Smansasi Berbagi
-          </h1>
-          <p className="text-stone-500 text-sm sm:text-base font-light max-w-md leading-relaxed">
+          <div className="hero-block" style={{ animationDelay: "0.25s" }}>
+            <h1
+              className="display font-semibold leading-none tracking-tight"
+              style={{ fontSize: "clamp(2.8rem,8vw,4rem)" }}
+            >
+              <span style={{ color: "#f5f0e8" }}>Apollo</span>
+              <br />
+              <span style={{ color: "#a855f7" }}>Ramadan Charity Event</span>
+            </h1>
+          </div>
+
+          <p
+            className="hero-block mt-5 text-stone-400 text-sm sm:text-base font-light max-w-sm leading-relaxed"
+            style={{ animationDelay: "0.45s" }}
+          >
             Every act of giving during Ramadan is multiplied. Your contribution
             reaches those who need it most.
           </p>
+          <p
+            className="hero-block text-stone-400 text-sm sm:text-base font-light max-w-sm leading-relaxed"
+            style={{ animationDelay: "0.45s" }}
+          >
+            Donation Period: 2nd - 13th March 2026
+          </p>
 
-          <div className="mt-6 md:mt-8">
+          <div className="hero-block mt-8" style={{ animationDelay: "0.65s" }}>
             <a
               href={CONFIG.GOOGLE_FORM_URL}
               target="_blank"
               rel="noreferrer"
               className="block sm:inline-block"
             >
-              {/* CHANGED: Button is full-width on mobile, auto-width on larger screens */}
-              <Button className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-sm px-8 h-12 sm:h-10 text-sm tracking-wide transition-colors">
+              <button
+                className="w-full sm:w-auto h-11 px-8 text-xs font-medium tracking-[0.2em] uppercase rounded-sm transition-all duration-300 cursor-pointer"
+                style={{
+                  background: "linear-gradient(135deg, #4a1d96, #7c3aed)",
+                  color: "#f3e8ff",
+                  border: "1px solid rgba(168,85,247,0.3)",
+                  boxShadow:
+                    "0 0 24px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.08)",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                    "0 0 40px rgba(168,85,247,0.35), inset 0 1px 0 rgba(255,255,255,0.1)";
+                  (e.currentTarget as HTMLButtonElement).style.background =
+                    "linear-gradient(135deg, #7c3aed, #9333ea)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                    "0 0 24px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.08)";
+                  (e.currentTarget as HTMLButtonElement).style.background =
+                    "linear-gradient(135deg, #4a1d96, #7c3aed)";
+                }}
+              >
                 Donate Now
-              </Button>
+              </button>
             </a>
           </div>
         </header>
 
-        <Separator className="mb-8 md:mb-10 bg-stone-200" />
-
-        {/* ── SETUP NOTICE ── */}
-        {isDemo && (
-          <Alert className="mb-8 border-amber-200 bg-amber-50 text-amber-800">
-            <AlertDescription className="text-xs leading-relaxed">
-              <strong>Demo mode</strong> — Replace{" "}
-              <code className="bg-amber-100 px-1 rounded break-all">
-                YOUR_APPS_SCRIPT_URL
-              </code>{" "}
-              and{" "}
-              <code className="bg-amber-100 px-1 rounded break-all">
-                YOUR_GOOGLE_FORM_URL
-              </code>{" "}
-              in the config to go live. See <strong>SETUP_GUIDE.md</strong> for
-              full instructions.
-            </AlertDescription>
-          </Alert>
-        )}
+        <div className="cosmic-sep mb-10" />
 
         {/* ── ERROR ── */}
         {error && (
-          <Alert className="mb-8 border-red-200 bg-red-50 text-red-700">
-            <AlertDescription className="text-xs">{error}</AlertDescription>
-          </Alert>
+          <div
+            className="mb-8 rounded-lg px-4 py-3 text-xs text-red-400"
+            style={{
+              background: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.2)",
+            }}
+          >
+            {error}
+          </div>
         )}
 
-        {/* ── STATS ROW ── */}
-        {/* CHANGED: Stacks into 1 column on small screens to prevent text overlap */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-8">
-          <Card className="border-stone-200 bg-white">
-            <CardContent className="p-4 sm:p-5">
-              <p className="text-[10px] sm:text-xs text-stone-400 uppercase tracking-widest mb-1 sm:mb-2 font-medium">
+        {/* ── BENEFICIARY ── */}
+        <section
+          className="stats-block mb-10"
+          style={{ animationDelay: "0.8s" }}
+        >
+          <h2 className="text-[10px] text-stone-500 uppercase tracking-[0.2em] font-medium mb-5">
+            Proceeds Go To
+          </h2>
+          <a
+            href="https://pantiyatim.or.id/"
+            target="_blank"
+            rel="noreferrer"
+            className="group block rounded-lg overflow-hidden relative transition-all duration-500"
+            style={{
+              border: "1px solid rgba(168,85,247,0.2)",
+              background: "rgba(255,255,255,0.03)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.border =
+                "1px solid rgba(168,85,247,0.45)";
+              (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                "0 0 30px rgba(168,85,247,0.12)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.border =
+                "1px solid rgba(168,85,247,0.2)";
+              (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none";
+            }}
+          >
+            {/* Image */}
+            <div
+              className="relative overflow-hidden"
+              style={{ height: "180px" }}
+            >
+              <img
+                src="https://pantiyatim.or.id/wp-content/uploads/2020/09/pyi-logo-color.png"
+                alt="Panti Asuhan PYI Yatim & Zakat"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                style={{ filter: "brightness(0.6) saturate(0.8)" }}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(to top, rgba(9,9,15,0.95) 0%, rgba(9,9,15,0.3) 60%, transparent 100%)",
+                }}
+              />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <p
+                  className="display text-xl font-semibold leading-tight"
+                  style={{ color: "#f5f0e8" }}
+                >
+                  Panti Asuhan PYI
+                </p>
+                <p
+                  className="display text-base italic"
+                  style={{ color: "#c084fc" }}
+                >
+                  Yatim &amp; Zakat
+                </p>
+              </div>
+            </div>
+
+            {/* Text body */}
+            <div className="p-4 sm:p-5">
+              <p className="text-stone-400 text-sm font-light leading-relaxed mb-4">
+                100% of all donations collected through Apollo Ramadan Charity
+                Event will be channelled directly to{" "}
+                <span style={{ color: "#c084fc" }}>
+                  Panti Asuhan PYI Yatim &amp; Zakat
+                </span>{" "}
+                — supporting orphans and those in need during this blessed month
+                of Ramadan.
+              </p>
+              <div
+                className="flex items-center gap-2"
+                style={{ color: "#a855f7" }}
+              >
+                <span className="text-xs font-medium tracking-wider uppercase">
+                  Visit pantiyatim.or.id
+                </span>
+                <span className="text-sm transition-transform duration-300 group-hover:translate-x-1">
+                  ↗
+                </span>
+              </div>
+            </div>
+          </a>
+        </section>
+
+        <div className="cosmic-sep mb-10" />
+
+        {/* ── STATS ── */}
+        <div className="stats-block" style={{ animationDelay: "0.95s" }}>
+          <div className="grid grid-cols-2 gap-3 mb-8">
+            <div
+              className="rounded-lg p-5 relative overflow-hidden"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.07)",
+              }}
+            >
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at top left, rgba(168,85,247,0.07), transparent 70%)",
+                }}
+              />
+              <p className="text-[10px] text-stone-500 uppercase tracking-[0.2em] mb-2 font-medium">
                 Total Raised
               </p>
-              <p className="text-xl sm:text-2xl font-bold text-stone-900 tabular-nums">
+              <p
+                className="text-xl sm:text-2xl font-bold tabular-nums"
+                style={{ color: "#d8b4fe" }}
+              >
                 {loading ? (
-                  <span className="inline-block w-32 h-6 bg-stone-100 rounded animate-pulse" />
+                  <span
+                    className="inline-block w-32 h-6 rounded animate-pulse"
+                    style={{ background: "rgba(255,255,255,0.08)" }}
+                  />
                 ) : (
                   <AnimatedTotal amount={total} />
                 )}
               </p>
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card className="border-stone-200 bg-white">
-            <CardContent className="p-4 sm:p-5">
-              <p className="text-[10px] sm:text-xs text-stone-400 uppercase tracking-widest mb-1 sm:mb-2 font-medium">
+            <div
+              className="rounded-lg p-5 relative overflow-hidden"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.07)",
+              }}
+            >
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at top right, rgba(56,189,248,0.05), transparent 70%)",
+                }}
+              />
+              <p className="text-[10px] text-stone-500 uppercase tracking-[0.2em] mb-2 font-medium">
                 Donors
               </p>
-              <p className="text-xl sm:text-2xl font-bold text-stone-900">
+              <p className="text-xl sm:text-2xl font-bold text-stone-200">
                 {loading ? (
-                  <span className="inline-block w-12 h-6 bg-stone-100 rounded animate-pulse" />
+                  <span
+                    className="inline-block w-12 h-6 rounded animate-pulse"
+                    style={{ background: "rgba(255,255,255,0.08)" }}
+                  />
                 ) : (
                   sorted.length
                 )}
               </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* ── PROGRESS ── */}
-        <div className="mb-8 md:mb-10">
-          {/* CHANGED: Flex layout allows stacking if text gets too wide on narrow screens */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-2 gap-1 sm:gap-0">
-            <p className="text-xs text-stone-500 font-medium uppercase tracking-widest">
-              Goal Progress
-            </p>
-            <p className="text-xs text-stone-500 tabular-nums">
-              {formatRp(total)}{" "}
-              <span className="text-stone-300">
-                / {formatRp(CONFIG.DONATION_GOAL)}
-              </span>
-            </p>
+            </div>
           </div>
-          <Progress
-            value={pct}
-            className="h-2 sm:h-1.5 bg-stone-100 [&>div]:bg-amber-400 [&>div]:transition-all [&>div]:duration-1000"
-          />
-          <p className="text-right text-[10px] sm:text-xs text-stone-400 mt-1.5">
-            {pct}%
-          </p>
-        </div>
 
-        <Separator className="mb-8 bg-stone-100" />
+          {/* Progress */}
+          <div className="mb-10">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-3 gap-1">
+              <p className="text-[10px] text-stone-500 uppercase tracking-[0.2em] font-medium">
+                Goal Progress
+              </p>
+              <p className="text-[11px] text-stone-500 tabular-nums">
+                {formatRp(total)}{" "}
+                <span style={{ color: "rgba(255,255,255,0.15)" }}>
+                  / {formatRp(CONFIG.DONATION_GOAL)}
+                </span>
+              </p>
+            </div>
+            <CosmicProgress value={pct} />
+            <p className="text-right text-[10px] text-stone-600 mt-2">{pct}%</p>
+          </div>
+        </div>
 
         {/* ── DONOR LIST ── */}
-        <section>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-1 sm:gap-0">
-            <h2 className="serif text-lg font-semibold text-stone-800">
+        <section className="stats-block" style={{ animationDelay: "1s" }}>
+          <div className="flex items-center justify-between mb-6">
+            <h2
+              className="display text-xl font-semibold"
+              style={{ color: "#f5f0e8" }}
+            >
               Donors
             </h2>
-            <p className="text-[10px] sm:text-xs text-stone-400 font-mono">
-              Auto-refreshes every 30s
-            </p>
           </div>
-
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -425,52 +650,61 @@ export default function App() {
               ))}
             </div>
           ) : sorted.length === 0 ? (
-            <Card className="border-stone-200 bg-white">
-              <CardContent className="py-12 sm:py-16 text-center">
-                <Crescent size={36} />
-                <p className="mt-4 text-stone-400 text-sm">
-                  No donations yet. Be the first to give.
-                </p>
-              </CardContent>
-            </Card>
+            <div
+              className="rounded-lg py-16 text-center"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.07)",
+              }}
+            >
+              <Crescent size={36} />
+              <p className="mt-4 text-stone-500 text-sm">
+                No donations yet. Be the first to give.
+              </p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {sorted.map((d, i) => (
-                <DonorCard
-                  key={i}
-                  donor={d}
-                  rank={i}
-                  onReceiptClick={setLightboxSrc}
-                  delay={i * 60}
-                />
+                <DonorCard key={i} donor={d} rank={i} delay={1000 + i * 80} />
               ))}
             </div>
           )}
         </section>
 
         {/* ── FOOTER ── */}
-        <footer className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
-          <div className="flex items-center gap-2 text-stone-400">
-            <Crescent size={16} />
-            <span className="text-[10px] sm:text-xs font-medium">
-              Apollo Berbagi
+        <footer
+          className="mt-16 pt-8 flex items-center justify-between"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <div className="flex items-center gap-2">
+            <Crescent size={14} />
+            <span className="text-[10px] text-stone-600 font-medium tracking-widest uppercase">
+              Apollo Ramadan Charity Event 2026
             </span>
           </div>
-          <p className="serif text-xs text-stone-300 font-light italic">
+          <p
+            className="display text-sm italic"
+            style={{ color: "rgba(255,255,255,0.2)" }}
+          >
             بركة رمضان
           </p>
         </footer>
       </div>
 
-      {/* ── RECEIPT LIGHTBOX ── */}
+      {/* ── LIGHTBOX ── */}
       <Dialog open={!!lightboxSrc} onOpenChange={() => setLightboxSrc(null)}>
-        {/* CHANGED: Adjusted dialog width and padding for mobile */}
-        <DialogContent className="w-[90vw] max-w-xl p-2 sm:p-4 bg-white border-stone-200 rounded-lg">
+        <DialogContent
+          className="w-[92vw] max-w-lg p-2 rounded-lg"
+          style={{
+            background: "#0f0f18",
+            border: "1px solid rgba(168,85,247,0.2)",
+          }}
+        >
           {lightboxSrc && (
             <img
               src={lightboxSrc}
               alt="Transfer Receipt"
-              className="w-full rounded object-contain max-h-[75vh]"
+              className="w-full rounded object-contain max-h-[78vh]"
             />
           )}
         </DialogContent>
