@@ -386,7 +386,7 @@ export default function App() {
               className="display font-semibold leading-none tracking-tight"
               style={{ fontSize: "clamp(2.8rem,8vw,4rem)" }}
             >
-              <span style={{ color: "#f5f0e8" }}>Apollo</span>
+              <span style={{ color: "#f5f0e8" }}>Apollo Smansasi</span>
               <br />
               <span style={{ color: "#a855f7" }}>Ramadan Charity Event</span>
             </h1>
@@ -525,7 +525,7 @@ export default function App() {
             {/* Text body */}
             <div className="p-4 sm:p-5">
               <p className="text-stone-400 text-sm font-light leading-relaxed mb-4">
-                100% of all donations collected through Apollo Ramadan Charity
+                100% of all donations collected through Apollo Smansasi Ramadan Charity
                 Event will be channelled directly to{" "}
                 <span style={{ color: "#c084fc" }}>
                   Panti Asuhan PYI Yatim &amp; Zakat
@@ -679,7 +679,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <Crescent size={14} />
             <span className="text-[10px] text-stone-600 font-medium tracking-widest uppercase">
-              Apollo Ramadan Charity Event 2026
+              Apollo Smansasi Ramadan Charity Event 2026
             </span>
           </div>
           <p
